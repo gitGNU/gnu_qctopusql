@@ -35,7 +35,7 @@ CREATE FUNCTION spam_user(text,text,integer) RETURNS integer AS $$
 	   		i_score integer;
 			i_type ALIAS FOR $3;
 	   BEGIN
-			SELECT INTO i_score spam_score FROM users where login=t_login and domain=t_domain and spam=i_type;
+			SELECT INTO i_score spam_score FROM users_view where login=t_login and domain=t_domain and id_spam=i_type;
 	   		
 			IF NOT FOUND THEN
                RETURN 1000;

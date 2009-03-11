@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>594</width>
-    <height>377</height>
+    <width>686</width>
+    <height>303</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -127,6 +127,12 @@
        </item>
        <item>
         <widget class="QLineEdit" name="lineEdit_Password" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+           <horstretch>20</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="inputMask" >
           <string/>
          </property>

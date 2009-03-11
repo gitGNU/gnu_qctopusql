@@ -22,7 +22,10 @@
 #include <about.h>
 #include <QWidget>
 
-
+/**
+* Create Main Window
+* 
+*/
 MainWindow::MainWindow(QWidget *parent)
   : QWidget(parent)
 {
@@ -72,7 +75,10 @@ MainWindow::~MainWindow(){
   delete Tab;
   delete layout;
 }
-
+/**
+ * About Dialog
+ *
+ */
 void MainWindow::About(){
 
   AboutDialog *Dialog;
@@ -81,12 +87,18 @@ void MainWindow::About(){
   delete Dialog;
   
 }
+/**
+ * Profilres Dialog see Profiles
+ */
 void MainWindow::DialogProfiles(){
 
   Profiles profil(ui.lineEdit_Host, ui.lineEdit_Port, ui.lineEdit_DB, ui.lineEdit_User, ui.lineEdit_Password);
   profil.exec();
 
 }
+/**
+ * Connect Data Base
+ */
 
 void MainWindow::ConnectDB(){
   bool ok;
@@ -122,7 +134,9 @@ void MainWindow::ConnectDB(){
   }
   
 }
-
+/**
+ *Disconnect Data Base
+ */
 void MainWindow::DisconnectDB(){
 
   qDebug("Disconnect");
@@ -149,6 +163,9 @@ void MainWindow::DisconnectDB(){
   db.close();
 
 }
+/**
+ *Get list domains.
+ */
 
 int MainWindow::GetAllDomains(){
 
@@ -194,6 +211,9 @@ int MainWindow::GetAllDomains(){
   return 0;
 
 }
+/**
+ *Get list types of domain
+ */
 
 int MainWindow::GetTypeDomains(){
 
