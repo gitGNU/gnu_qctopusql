@@ -162,23 +162,18 @@ void UsersForwardFindDialog::showContextMenu(const QPoint &point){
 }
 
 void UsersForwardFindDialog::DialogDelete(){
-
-  QString Local_Part = tableWidget_Find->item(tableWidget_Find->currentItem()->row(), 0)->text();
-  QString Domain = tableWidget_Find->item(tableWidget_Find->currentItem()->row(), 1)->text();
- 
-  UsersForwardDeleteDialog *DialogDelete;
-  DialogDelete = new UsersForwardDeleteDialog(db_psql, Local_Part, Domain);
-  DialogDelete->exec();
-  delete DialogDelete;
-  
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
 	
-	this->reject();
+	UsersForwardDeleteDialog *DialogDelete;
+	DialogDelete = new UsersForwardDeleteDialog(db_psql, tableWidget_Find);
+	DialogDelete->exec();
+	delete DialogDelete;
 	
-  }
-  
+	TestQuery();
+	
+	if( !db_psql.isOpen() ){
+		
+		this->reject();
+	}
 }
 
 void UsersForwardFindDialog::DialogEdit(){

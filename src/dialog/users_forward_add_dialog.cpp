@@ -79,7 +79,7 @@ void UsersForwardAddDialog::NewRow(){
 	tableWidget_recipients->setItem(tableWidget_recipients->rowCount() - 1, 0, __item0);
 	
 	QTableWidgetItem *__item1 = new QTableWidgetItem();
-	__item1->setText(tr(""));
+	__item1->setText(lineEdit_Domain->text());
 	tableWidget_recipients->setItem(tableWidget_recipients->rowCount() - 1, 1, __item1);
 }
 

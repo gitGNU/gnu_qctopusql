@@ -153,7 +153,6 @@ void AliasesAddDialog::Add(){
 				__item2->setText(recipients);
 				pTable->setItem(0, 2, __item2);
 				
-				
 				query.clear();
 				this->accept();
 			}

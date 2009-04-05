@@ -26,21 +26,26 @@
 #include <QString>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QTableWidget>
 #include "ui_users_forward_delete_dialog.h"
 
 
 class UsersForwardDeleteDialog : public QDialog, private Ui::DialogUsersForwardDelete {
     Q_OBJECT
- public:
-  UsersForwardDeleteDialog (QSqlDatabase db, QString local_part, QString domain);
- 
- private slots:
-  void Delete();
+	
+public:
+	
+	UsersForwardDeleteDialog (QSqlDatabase db, QTableWidget *Table);
+																   
+private slots:
+	
+	void Delete();
+	
+private:
 
- private:
-  QSqlDatabase db_psql;
-  void TestQuery();
-
+	QTableWidget *pTable;
+	QSqlDatabase db_psql;
+	void TestQuery();
 };
 
 

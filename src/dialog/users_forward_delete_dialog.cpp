@@ -21,59 +21,68 @@
 #include <QMessageBox>
 #include <QString>
 
+/**
+ * Create aliases delete dialog.
+ *
+ * @param
+ * (db) Connection database.
+ * (*Table) Pointer to table aliases
+ *
+ * @return
+ *  accept or reject
+ */
+UsersForwardDeleteDialog::UsersForwardDeleteDialog(QSqlDatabase db, QTableWidget *Table){
 
-UsersForwardDeleteDialog::UsersForwardDeleteDialog(QSqlDatabase db, QString local_part, QString domain){
-  
-  db_psql = db;
-  
-  setupUi( this );
+	pTable = Table;
+	db_psql = db;
+	
+	setupUi( this );
 
-  lineEdit_Local_Part->setText(local_part);
-  lineEdit_Domain->setText(domain);
-  connect(buttonBox, SIGNAL(accepted()), this, SLOT(Delete()));
-
+	lineEdit_Domain->setText(pTable->item(pTable->currentRow(), 1)->text());
+	lineEdit_Local_Part->setText(pTable->item(pTable->currentRow(), 0)->text());
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(Delete()));
 }
 
+/**
+ * Delete userforward.
+ */
 void UsersForwardDeleteDialog::Delete(){
+	
+	TestQuery();
+	
+	if( db_psql.isOpen() ){ 
+		
+		QSqlQuery query( db_psql );
 
-  TestQuery();
-  
-  if( db_psql.isOpen() ){ 
+		//Create SQL query
+		query.prepare("DELETE FROM userforward WHERE local_part=:login and id_domain=get_domain_id(:domain)");
+		
+		query.bindValue(":login", lineEdit_Local_Part->text());
+		query.bindValue(":domain", lineEdit_Domain->text());
 	
-	QSqlQuery query( db_psql );
-	
-	query.prepare("DELETE FROM userforward WHERE local_part=:login and id_domain=get_domain_id(:domain)");
-	
-	query.bindValue(":login", lineEdit_Local_Part->text());
-	query.bindValue(":domain", lineEdit_Domain->text());
-	
-	if( !query.exec() ){
+		if( !query.exec() ){
 	  
-	  QMessageBox::warning(this, tr("Query Error"),
-						   query.lastError().text(),
-						   QMessageBox::Ok);
-	  query.clear();
-	  
+			QMessageBox::warning(this, tr("Query Error"),
+								 query.lastError().text(),
+								 QMessageBox::Ok);
+			query.clear();
+		}else{
+			
+			/* Update aliases table. */
+			query.clear();
+			pTable->removeRow(pTable->currentRow());
+			this->accept();	
+		}
 	}else{
-	  
-	  query.clear();
-	  this->accept();
-	
-	}
-	
-  }else{
-
-	this->reject();
-
-  }
-  
+		
+		this->reject();	
+	}	
 }
 
 void UsersForwardDeleteDialog::TestQuery(){
-
-  QSqlQuery query( db_psql );
-  
-  query.exec("SELECT 1");
-  query.clear();
-  
+	
+	QSqlQuery query( db_psql );
+	
+	query.exec("SELECT 1");
+	query.clear();
 }
