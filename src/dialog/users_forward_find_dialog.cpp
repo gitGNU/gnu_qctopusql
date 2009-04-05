@@ -31,143 +31,158 @@
 #include <users_forward_delete_dialog.h>
 #include <users_forward_edit_dialog.h>
 
+/**
+ * Create userforward find dialog.
+ *
+ * @param
+ * (db) Connection database.
+ * (*Table) Pointer to table aliases
+ *
+ * @return
+ *  accept or reject
+ */
 UsersForwardFindDialog::UsersForwardFindDialog(QSqlDatabase db, QWidget *parent)
-        : QDialog(parent) {
-  
-  db_psql = db;
-
-  setupUi( this );
-
-
-  connect(pushButton_Search, SIGNAL(clicked()), this, SLOT(Find()));
-  connect(checkBox, SIGNAL(clicked(bool)), lineEdit_Domain, SLOT(setEnabled(bool)));
-  connect(tableWidget_Find, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
-
-  completer = new QCompleter(this);
-  lineEdit_Domain->setCompleter(completer);
+	: QDialog(parent) {
+	
+	db_psql = db;
+	
+	setupUi( this );
+	
+	connect(pushButton_Search, SIGNAL(clicked()), this, SLOT(Find()));
+	connect(checkBox, SIGNAL(clicked(bool)), lineEdit_Domain, SLOT(setEnabled(bool)));
+	connect(tableWidget_Find, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+	
+	completer = new QCompleter(this);
+	lineEdit_Domain->setCompleter(completer);
 }
 
 UsersForwardFindDialog::~UsersForwardFindDialog(){
-
-  delete completer;
-
+	
+	delete completer;
 }
 
-
+/**
+ * Search userforward
+ */
 void UsersForwardFindDialog::Find(){
-  
-  QString StringFind;
-  QString StringDomain;
-  
-  if( lineEdit_Domain->isEnabled() ){
 	
-	StringDomain.append("%");
-	StringDomain.append(lineEdit_Domain->text());
-	StringDomain.append("%");
-  
-  }else{
+	QString StringFind;
+	QString StringDomain;
 	
-	StringDomain="%%";
-  
-  }
-
-  StringFind.append("%");
-  StringFind.append(lineEdit_Find->text());
-  StringFind.append("%");
-
-  TestQuery();
-  
-  if( db_psql.isOpen() ){ 	
-
-	if(tableWidget_Find->isSortingEnabled()){
-	  
-	  tableWidget_Find->setSortingEnabled(false);
-	  
-	}
-	
-	tableWidget_Find->clearContents();
-	tableWidget_Find->setRowCount(0);
-	
-	QSqlQuery query( db_psql );
-	
-	if(comboBox->currentIndex() == 0){
-	  
-	  query.prepare("SELECT local_part,domain,recipients FROM userforward_view WHERE local_part ILIKE :find and domain ILIKE :domain");
-	
+	if( lineEdit_Domain->isEnabled() ){
+		
+		/*Search, taking into account the domain */
+		StringDomain.append("%");
+		StringDomain.append(lineEdit_Domain->text());
+		StringDomain.append("%");
 	}else{
-	  
-	  query.prepare("SELECT local_part,domain,recipients FROM userforward_view WHERE recipients ILIKE :find and domain ILIKE :domain");
-	
+		
+		StringDomain="%%";
 	}
-	
-	query.bindValue(":find", StringFind);
-	query.bindValue(":domain", StringDomain);
-	
-	if( !query.exec() ){
-	  
-	  QMessageBox::warning(this, tr("Query Error"),
-						   query.lastError().text(),
-						   QMessageBox::Ok);
-	  query.clear();
-	  
-	}else{
-	  
-	  for(int i = 0; i < query.size(); i++){
-		
-		query.next();
-		tableWidget_Find->setRowCount(i + 1);
-		
-		__item0 = new QTableWidgetItem();
-		__item0->setText(query.value(0).toString());
-		tableWidget_Find->setItem(i, 0, __item0);
-		
-		__item1 = new QTableWidgetItem();
-		__item1->setText(query.value(1).toString());
-		tableWidget_Find->setItem(i, 1, __item1);
-		
-		__item2 = new QTableWidgetItem();
-		__item2->setText(query.value(2).toString());
-		tableWidget_Find->setItem(i, 2, __item2);
-		
-	  }
-	  
-	}
-	
-	tableWidget_Find->setSortingEnabled(true);
-	query.clear();
-	
-  }else{
 
-	this->reject();
+	StringFind.append("%");
+	StringFind.append(lineEdit_Find->text());
+	StringFind.append("%");
+	
+	TestQuery();
   
-  }
-  
+	if( db_psql.isOpen() ){ 	
+		
+		if(tableWidget_Find->isSortingEnabled()){
+			
+			tableWidget_Find->setSortingEnabled(false);
+		}
+	
+		tableWidget_Find->clearContents();
+		tableWidget_Find->setRowCount(0);
+		
+		QSqlQuery query( db_psql );
+		
+		/* Search in column local_part or recipients*/
+		if(comboBox->currentIndex() == 0){
+			
+			query.prepare("SELECT local_part,domain,recipients FROM userforward_view WHERE local_part ILIKE :find and domain ILIKE :domain");
+		}else{
+			
+			query.prepare("SELECT local_part,domain,recipients FROM userforward_view WHERE recipients ILIKE :find and domain ILIKE :domain");
+		}
+		
+		query.bindValue(":find", StringFind);
+		query.bindValue(":domain", StringDomain);
+	
+		if( !query.exec() ){
+			
+			QMessageBox::warning(this, tr("Query Error"),
+								 query.lastError().text(),
+								 QMessageBox::Ok);
+			query.clear();
+		}else{
+			
+			/* Filling the table */
+			for(int i = 0; i < query.size(); i++){
+				
+				query.next();
+				tableWidget_Find->setRowCount(i + 1);
+				
+				__item0 = new QTableWidgetItem();
+				__item0->setText(query.value(0).toString());
+				tableWidget_Find->setItem(i, 0, __item0);
+				
+				__item1 = new QTableWidgetItem();
+				__item1->setText(query.value(1).toString());
+				tableWidget_Find->setItem(i, 1, __item1);
+				
+				__item2 = new QTableWidgetItem();
+				__item2->setText(query.value(2).toString());
+				tableWidget_Find->setItem(i, 2, __item2);	
+			}	
+		}
+	
+		tableWidget_Find->setSortingEnabled(true);
+		query.clear();
+	}else{
+		
+		this->reject();
+	}
 }
 
+/**
+ * Function creates a context menu at the point
+ * of pressing the right button on the table.
+ * @param
+ * (const QPoint & point)
+ *  point of pressing
+ */
 void UsersForwardFindDialog::showContextMenu(const QPoint &point){
-  
-  tableWidget_Find->setCurrentItem(tableWidget_Find->itemAt(point));
-  
-  if(tableWidget_Find->indexAt(point).row() != -1){
 	
-	QMenu Pop_up;
+	tableWidget_Find->setCurrentItem(tableWidget_Find->itemAt(point));
 	
-	connect(Pop_up.addAction(tr("Delete Users Forward")), SIGNAL(triggered()), this, SLOT(DialogDelete()));
-	connect(Pop_up.addAction(tr("Edit Users Forward")), SIGNAL(triggered()), this, SLOT(DialogEdit()));
-	
-	Pop_up.exec(QCursor::pos());
-	
-  }
-  
+	if(tableWidget_Find->indexAt(point).row() != -1){
+		
+		QMenu Pop_up;
+		
+		connect(Pop_up.addAction(tr("Delete Users Forward")), SIGNAL(triggered()), this, SLOT(DialogDelete()));
+		connect(Pop_up.addAction(tr("Edit Users Forward")), SIGNAL(triggered()), this, SLOT(DialogEdit()));
+		
+		Pop_up.exec(QCursor::pos());	
+	}
 }
 
+/**
+ * Call dialog delete userforward.
+ */
 void UsersForwardFindDialog::DialogDelete(){
-	
+
+    //Correction of incorrect display when sorting
+	tableWidget_Find->setSortingEnabled(false);
+
+    //Create dialog
 	UsersForwardDeleteDialog *DialogDelete;
 	DialogDelete = new UsersForwardDeleteDialog(db_psql, tableWidget_Find);
 	DialogDelete->exec();
 	delete DialogDelete;
-	
+
+	tableWidget_Find->setSortingEnabled(true);
 	TestQuery();
 	
 	if( !db_psql.isOpen() ){
@@ -176,13 +191,21 @@ void UsersForwardFindDialog::DialogDelete(){
 	}
 }
 
+/**
+ * Call dialog edit userforward.
+ */
 void UsersForwardFindDialog::DialogEdit(){
 	
+	//Correction of incorrect display when sorting
+	tableWidget_Find->setSortingEnabled(false);
+
+    //Create dialog
 	UsersForwardEditDialog *DialogEdit;
 	DialogEdit = new UsersForwardEditDialog(db_psql, tableWidget_Find);
 	DialogEdit->exec();
 	delete DialogEdit;
-	
+
+	tableWidget_Find->setSortingEnabled(true);
 	TestQuery();
 	
 	if( !db_psql.isOpen() ){
@@ -191,17 +214,21 @@ void UsersForwardFindDialog::DialogEdit(){
 	}
 }
 
+/**
+ * Test connection.
+ */
 void UsersForwardFindDialog::TestQuery(){
-
-  QSqlQuery query( db_psql );
-  
-  query.exec("SELECT 1");
-  query.clear();
-  
+	
+	QSqlQuery query( db_psql );
+	
+	query.exec("SELECT 1");
+	query.clear();
 }
 
+/**
+ * Function sets the list of domains
+ */
 void UsersForwardFindDialog::setCompleterModel(QAbstractItemModel *model){
 
-  completer->setModel(model);
-
+	completer->setModel(model);
 }

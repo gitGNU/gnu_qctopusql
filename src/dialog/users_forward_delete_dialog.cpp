@@ -22,7 +22,7 @@
 #include <QString>
 
 /**
- * Create aliases delete dialog.
+ * Create userforward delete dialog.
  *
  * @param
  * (db) Connection database.
