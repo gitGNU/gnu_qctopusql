@@ -23,157 +23,169 @@
 #include <users_forward_edit_dialog.h>
 #include <users_forward_find_dialog.h>
 
+/**
+ * Create userforward table.
+ */
 UsersForward::UsersForward(QSqlDatabase db, QWidget *parent)
-  : QWidget(parent){
-  
-  db_psql = db;
-  
-  ui.setupUi( this );
-  
-  connect(ui.pushButton, SIGNAL(clicked()), this, SLOT(GetUsersForward()));
-  connect(ui.tableWidget_UsersForward, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
-  
-  for(int i = 0; i < 3; i++){
+	: QWidget(parent){
 	
-	ui.tableWidget_UsersForward->setColumnWidth(i, 100);
-  
-  }
+	db_psql = db;
+	
+	ui.setupUi( this );
+	
+	connect(ui.pushButton, SIGNAL(clicked()), this, SLOT(GetUsersForward()));
+	connect(ui.tableWidget_UsersForward, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+	
+	for(int i = 0; i < 3; i++){
+		
+		ui.tableWidget_UsersForward->setColumnWidth(i, 100);	
+	}
 
-  QStringList wordList;
-  wordList << "obsd.org" ;
-  
-  completerModel = new QStringListModel;
-  completerModel->setStringList(wordList);
-  
-  completer = new QCompleter(this);
-  completer->setModel(completerModel);
-
-  ui.lineEdit_Domain->setCompleter(completer);
-  
+	QStringList wordList;
+	wordList << "obsd.org" ;
+	
+	completerModel = new QStringListModel;
+	completerModel->setStringList(wordList);
+	
+	completer = new QCompleter(this);
+	completer->setModel(completerModel);
+	
+	ui.lineEdit_Domain->setCompleter(completer);
 }
 
+/**
+ * Get userforward
+ */
 void UsersForward::GetUsersForward(){
-
-  /*freezing input Users Forward Widget*/
-  ui.pushButton->setEnabled(false);
-  ui.lineEdit_Domain->setEnabled(false);
-  ui.tableWidget_UsersForward->setEnabled(false);
-  
-  TestQuery();
-  
-  if( db_psql.isOpen() ){ 
-
-	if(ui.tableWidget_UsersForward->isSortingEnabled()){
-	  
-	  ui.tableWidget_UsersForward->setSortingEnabled(false);
-
-	}
 	
-	ui.tableWidget_UsersForward->clearContents();
-	ui.tableWidget_UsersForward->setRowCount(0);
+	/*freezing input Users Forward Widget*/
+	ui.pushButton->setEnabled(false);
+	ui.lineEdit_Domain->setEnabled(false);
+	ui.tableWidget_UsersForward->setEnabled(false);
 	
-	QSqlQuery query( db_psql );
+	TestQuery();
 	
-	query.prepare("SELECT local_part,domain,recipients  FROM userforward_view WHERE domain=:id_domain");
-	query.bindValue(":id_domain", ui.lineEdit_Domain->text());
-	
-	if( query.exec() ){
+	if( db_psql.isOpen() ){ 
 
-	  ui.tableWidget_UsersForward->setRowCount(query.size());
-	  QProgressDialog progress(tr("Getting a list of users forward."), tr("Cancel"),0,query.size(),this);
-	  
-	  for(int i = 0; i < query.size(); i++){
-		
-		query.next();
-
-		progress.setValue(i);
-		qApp->processEvents();
-		if (progress.wasCanceled()){
-		  ui.tableWidget_UsersForward->setRowCount(i);
-		  break;
+		if(ui.tableWidget_UsersForward->isSortingEnabled()){
+			
+			ui.tableWidget_UsersForward->setSortingEnabled(false);
 		}
+	
+		ui.tableWidget_UsersForward->clearContents();
+		ui.tableWidget_UsersForward->setRowCount(0);
+	
+		QSqlQuery query( db_psql );
 
-		__item0 = new QTableWidgetItem();
-		__item0->setText(query.value(0).toString());
-		ui.tableWidget_UsersForward->setItem(i, 0, __item0);
+        //Create SQL query
+		query.prepare("SELECT local_part,domain,recipients  FROM userforward_view WHERE domain=:id_domain");
+		query.bindValue(":id_domain", ui.lineEdit_Domain->text());
 		
-		__item1 = new QTableWidgetItem();
-		__item1->setText(query.value(1).toString());
-		ui.tableWidget_UsersForward->setItem(i, 1, __item1);
-		
-		__item2 = new QTableWidgetItem();
-		__item2->setText(query.value(2).toString());
-		ui.tableWidget_UsersForward->setItem(i, 2, __item2);
-		
+		if( query.exec() ){
 
-	  }
+			ui.tableWidget_UsersForward->setRowCount(query.size());
+			QProgressDialog progress(tr("Getting a list of users forward."), tr("Cancel"),0,query.size(),this);
+
+            /* Filling the table */
+			for(int i = 0; i < query.size(); i++){
+				
+				query.next();
+				
+				progress.setValue(i);
+				qApp->processEvents();
+				
+				if (progress.wasCanceled()){
+					
+					ui.tableWidget_UsersForward->setRowCount(i);
+					break;
+				}
+
+				__item0 = new QTableWidgetItem();
+				__item0->setText(query.value(0).toString());
+				ui.tableWidget_UsersForward->setItem(i, 0, __item0);
+				
+				__item1 = new QTableWidgetItem();
+				__item1->setText(query.value(1).toString());
+				ui.tableWidget_UsersForward->setItem(i, 1, __item1);
+				
+				__item2 = new QTableWidgetItem();
+				__item2->setText(query.value(2).toString());
+				ui.tableWidget_UsersForward->setItem(i, 2, __item2);
+			}
 	  
-	  ui.tableWidget_UsersForward->resizeColumnsToContents();
+			ui.tableWidget_UsersForward->resizeColumnsToContents();
+			
+			/* The minimum size of column 100 pixels */
+			for(int i = 0; i < 3; i++){
+		
+				if(ui.tableWidget_UsersForward->columnWidth(i) < 100){
+		
+					ui.tableWidget_UsersForward->setColumnWidth(i, 100);
+				}
+			}
+
+			ui.tableWidget_UsersForward->setSortingEnabled(true);
 	  
-	  for(int i = 0; i < 3; i++){
-		
-		if(ui.tableWidget_UsersForward->columnWidth(i) < 100){
-		
-		  ui.tableWidget_UsersForward->setColumnWidth(i, 100);
-		
+			query.clear();
+		}else{
+			
+			QMessageBox::warning(this, tr("Query Error"),
+								 query.lastError().text(),
+								 QMessageBox::Ok);
+			query.clear();
 		}
-	  
-	  }
-
-	  ui.tableWidget_UsersForward->setSortingEnabled(true);
-	  
-	  query.clear();
-	  
 	}else{
-	  
-	  QMessageBox::warning(this, tr("Query Error"),
-						   query.lastError().text(),
-						   QMessageBox::Ok);
-	  query.clear();
-	
+
+		emit DisconnectDB();
 	}
-	
-  }else{
-
-	emit DisconnectDB();
-	
-  }
   
-  /*defrosting input Users ForwardWidget*/
-  ui.pushButton->setEnabled(true);
-  ui.tableWidget_UsersForward->setEnabled(true);
-  ui.lineEdit_Domain->setEnabled(true); 
+	/*defrosting input Users ForwardWidget*/
+	ui.pushButton->setEnabled(true);
+	ui.tableWidget_UsersForward->setEnabled(true);
+	ui.lineEdit_Domain->setEnabled(true); 
 }
 
-
+/**
+ * Function creates a context menu at the point
+ * of pressing the right button on the table.
+ * @param
+ * (const QPoint & point)
+ *  point of pressing
+ */
 void UsersForward::showContextMenu(const QPoint &point){
-
-  ui.tableWidget_UsersForward->setCurrentItem(ui.tableWidget_UsersForward->itemAt(point));
-  
-  QMenu Pop_up;
-  
-  connect(Pop_up.addAction(tr("New Users Forward")), SIGNAL(triggered()), this, SLOT(Dialog_Add_UsersForward()));
-  connect(Pop_up.addAction(tr("Find Users Forward")), SIGNAL(triggered()), this, SLOT(Dialog_Find_UsersForward()));
-  
-  if(ui.tableWidget_UsersForward->indexAt(point).row() != -1){
 	
-	connect(Pop_up.addAction(tr("Delete Users Forward")), SIGNAL(triggered()), this, SLOT(Dialog_Delete_UsersForward()));
-	connect(Pop_up.addAction(tr("Edit Users Forward")), SIGNAL(triggered()), this, SLOT(Dialog_Edit_UsersForward()));
-
-  }
+	ui.tableWidget_UsersForward->setCurrentItem(ui.tableWidget_UsersForward->itemAt(point));
+	
+	QMenu Pop_up;
+	
+	connect(Pop_up.addAction(tr("New Users Forward")), SIGNAL(triggered()), this, SLOT(Dialog_Add_UsersForward()));
+	connect(Pop_up.addAction(tr("Find Users Forward")), SIGNAL(triggered()), this, SLOT(Dialog_Find_UsersForward()));
+	
+	if(ui.tableWidget_UsersForward->indexAt(point).row() != -1){
+		
+		connect(Pop_up.addAction(tr("Delete Users Forward")), SIGNAL(triggered()), this, SLOT(Dialog_Delete_UsersForward()));
+		connect(Pop_up.addAction(tr("Edit Users Forward")), SIGNAL(triggered()), this, SLOT(Dialog_Edit_UsersForward()));
+	}
   
-  Pop_up.exec(QCursor::pos());
-
+	Pop_up.exec(QCursor::pos());
 }
 
+/**
+ * Call dialog add userforward.
+ */
 void UsersForward::Dialog_Add_UsersForward(){
 	
+	//Correction of incorrect display when sorting
+	ui.tableWidget_UsersForward->setSortingEnabled(false);
+
+	//Crate Dialog
 	UsersForwardAddDialog *DialogAdd;
 	DialogAdd = new UsersForwardAddDialog( db_psql, ui.tableWidget_UsersForward);
 	DialogAdd->setCompleterModel( completerModel );
 	DialogAdd->exec();
 	delete DialogAdd;
-	
+
+	ui.tableWidget_UsersForward->setSortingEnabled(true);
 	TestQuery();
 	
 	if( !db_psql.isOpen() ){
@@ -182,13 +194,21 @@ void UsersForward::Dialog_Add_UsersForward(){
 	}
 }
 
+/**
+ * Call dialog delete userforward.
+ */
 void UsersForward::Dialog_Delete_UsersForward(){
-	
+
+    //Correction of incorrect display when sorting
+	ui.tableWidget_UsersForward->setSortingEnabled(false);
+
+	//Create Dialog
 	UsersForwardDeleteDialog *DialogDelete;
 	DialogDelete = new UsersForwardDeleteDialog(db_psql, ui.tableWidget_UsersForward);
 	DialogDelete->exec();
 	delete DialogDelete;
-	
+
+	ui.tableWidget_UsersForward->setSortingEnabled(true);
 	TestQuery();
 	
 	if( !db_psql.isOpen() ){
@@ -197,12 +217,40 @@ void UsersForward::Dialog_Delete_UsersForward(){
 	}
 }
 
+/**
+ * Call dialog edit userforward.
+ */
 void UsersForward::Dialog_Edit_UsersForward(){
-	
+
+    //Correction of incorrect display when sorting
+	ui.tableWidget_UsersForward->setSortingEnabled(false);
+
+	//Create Dialog
 	UsersForwardEditDialog *DialogEdit;
 	DialogEdit = new UsersForwardEditDialog(db_psql, ui.tableWidget_UsersForward);
 	DialogEdit->exec();
 	delete DialogEdit;
+
+	ui.tableWidget_UsersForward->setSortingEnabled(true);
+	TestQuery();
+	
+	if( !db_psql.isOpen() ){
+		
+		emit DisconnectDB();
+	}
+}
+
+/**
+ * Call dialog find userforward.
+ */
+void UsersForward::Dialog_Find_UsersForward(){
+
+	//Create dialog
+	UsersForwardFindDialog *DialogFind;
+	DialogFind = new UsersForwardFindDialog( db_psql );
+	DialogFind->setCompleterModel( completerModel );
+	DialogFind->exec();
+	delete DialogFind;
 	
 	TestQuery();
 	
@@ -211,35 +259,22 @@ void UsersForward::Dialog_Edit_UsersForward(){
 		emit DisconnectDB();
 	}
 }
-void UsersForward::Dialog_Find_UsersForward(){
 
-  UsersForwardFindDialog *DialogFind;
-  DialogFind = new UsersForwardFindDialog( db_psql );
-  DialogFind->setCompleterModel( completerModel );
-  DialogFind->exec();
-  delete DialogFind;
-
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
-	
-	emit DisconnectDB();
-	
-  }
-  
-}
-
+/**
+ * Test connection.
+ */
 void UsersForward::TestQuery(){
-
-  QSqlQuery query( db_psql );
-  
-  query.exec("SELECT 1");
-  query.clear();
-  
+	
+	QSqlQuery query( db_psql );
+	
+	query.exec("SELECT 1");
+	query.clear();
 }
 
+/**
+ * Function sets the list of domains
+ */
 void UsersForward::SetCompleterList(QStringList list){
-
-  completerModel->setStringList(list);
-  
+	
+	completerModel->setStringList(list);
 }
