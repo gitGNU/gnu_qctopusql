@@ -46,7 +46,7 @@ AliasesEditDialog::AliasesEditDialog(QSqlDatabase db, QTableWidget *Table, QWidg
   
 	QStringList list_recipients, list2_recipients;
 	
-	db_psql=db;
+	db_psql = db;
 	pTable = Table;
 	index = NULL;
 	lineEdit_Domain->setText(pTable->item(pTable->currentRow(), 1)->text());

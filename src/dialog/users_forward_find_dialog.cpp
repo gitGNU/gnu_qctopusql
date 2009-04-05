@@ -182,23 +182,18 @@ void UsersForwardFindDialog::DialogDelete(){
 }
 
 void UsersForwardFindDialog::DialogEdit(){
-  
-  QString Local_Part = tableWidget_Find->item(tableWidget_Find->currentItem()->row(), 0)->text();
-  QString Domain = tableWidget_Find->item(tableWidget_Find->currentItem()->row(), 1)->text();
- 
-  UsersForwardEditDialog *DialogEdit;
-  DialogEdit = new UsersForwardEditDialog(db_psql, Local_Part, Domain);
-  DialogEdit->exec();
-  delete DialogEdit;
-  
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
 	
-	this->reject();
+	UsersForwardEditDialog *DialogEdit;
+	DialogEdit = new UsersForwardEditDialog(db_psql, tableWidget_Find);
+	DialogEdit->exec();
+	delete DialogEdit;
 	
-  }
-
+	TestQuery();
+	
+	if( !db_psql.isOpen() ){
+		
+		this->reject();	
+	}
 }
 
 void UsersForwardFindDialog::TestQuery(){

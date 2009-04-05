@@ -31,235 +31,233 @@
 #include <QStringList>
 #include <QString>
 
-UsersForwardEditDialog::UsersForwardEditDialog(QSqlDatabase db,QString local_part, QString domain, QWidget *parent)
-        : QDialog(parent){
-  
-  QStringList list_recipients, list2_recipients;
-  
-  db_psql = db;
-  
-  setupUi( this );
-  
-  index = NULL;
-  lineEdit_Local_Part->setText(local_part);
-  lineEdit_Domain->setText(domain);
-
- 
-  /*
-
-	Get recipients from userforward
-
-   */
-  TestQuery();
-  
-  if( db_psql.isOpen() ){
+/**
+ * Create userforward edit dialog.
+ *
+ * @param
+ * (db)Connection database.
+ * (*Table) Pointer to table aliases.
+ *
+ * @return
+ *  accept or reject
+ */
+UsersForwardEditDialog::UsersForwardEditDialog(QSqlDatabase db,  QTableWidget *Table, QWidget *parent)
+	: QDialog(parent){
 	
-	QSqlQuery query( db_psql );
+	QStringList list_recipients, list2_recipients;
 	
-	query.prepare("SELECT recipients FROM userforward_view WHERE local_part=:local_part and domain=:domain LIMIT 1");
-	query.bindValue(":local_part", local_part);
-	query.bindValue(":domain", domain);
-	
-	if( query.exec() ){
-	  
-	  for(int i = 0; i < query.size(); i++){
-		
-		query.next();
-		list_recipients = query.value(0).toString().split(",");
-		
-		for(int j = 0; j < list_recipients.size(); j++){
-		  
-		  tableWidget_recipients->setRowCount(j + 1);
-		  
-		  
-		  list2_recipients=list_recipients.at(j).split("@");
-		  
-		  __item0 = new QTableWidgetItem();
-		  __item0->setText(list2_recipients.at(0));
-		  tableWidget_recipients->setItem(j, 0, __item0);
-		  
-		  if(list2_recipients.count() > 1){
-			
-			__item1 = new QTableWidgetItem();
-			__item1->setText(list2_recipients.at(1));
-			tableWidget_recipients->setItem(j, 1, __item1);
-			
-		  }else{
-			
-			__item1 = new QTableWidgetItem();
-			__item1->setText(lineEdit_Domain->text());
-			tableWidget_recipients->setItem(j, 1, __item1);
-			
-		  }
-		  
-		}
-	  
-	  }
-
-	  query.clear();
-	  
-	}else{
-	  
-	  QMessageBox::warning(this, tr("Query Error"),
-						   query.lastError().text(),
-						   QMessageBox::Ok);
-	  query.clear();
-	  
-	}
-	
-  }else{
-
-	this->reject();
-	
-  }
-  //
-
-  lineEdit_Local_Part->setReadOnly(true);
-  lineEdit_Domain->setReadOnly(true);
+	pTable = Table;
+	db_psql = db;
   
-  connect(pushButton_Add, SIGNAL(clicked()), this, SLOT(NewRow()));
-  connect(pushButton_Deleted, SIGNAL(clicked()), this, SLOT(DeleteRow()));
-  connect(buttonBox, SIGNAL(accepted()), this, SLOT(Update()));
-  connect(tableWidget_recipients ,SIGNAL(itemClicked(QTableWidgetItem * )), this, SLOT(SelectRow(QTableWidgetItem * )));//updte
-
-  tableWidget_recipients->setColumnWidth(0, 230);
-  tableWidget_recipients->setColumnWidth(1, 230);
-
-}
-
-
-void UsersForwardEditDialog::NewRow(){
-  
-  tableWidget_recipients->setRowCount(tableWidget_recipients->rowCount() + 1);
-
-  QTableWidgetItem *__item0 = new QTableWidgetItem();
-  __item0->setText(tr(""));
-  tableWidget_recipients->setItem(tableWidget_recipients->rowCount() - 1, 0, __item0);
-
-  QTableWidgetItem *__item1 = new QTableWidgetItem();
-  __item1->setText(tr(""));
-  tableWidget_recipients->setItem(tableWidget_recipients->rowCount() - 1, 0, __item1);
-
-}
-
-void UsersForwardEditDialog::DeleteRow(){
-  
-
-  if(index != NULL){
+	setupUi( this );
 	
-	tableWidget_recipients->removeRow(index->row());
 	index = NULL;
-  
-  }else{
+	lineEdit_Domain->setText(pTable->item(pTable->currentRow(), 1)->text());
+	lineEdit_Local_Part->setText(pTable->item(pTable->currentRow(), 0)->text());
 	
-	tableWidget_recipients->removeRow( tableWidget_recipients->rowCount()-1 );
-  
-  }
+	/* Get recipients from userforward */
+	TestQuery();
+	
+	if( db_psql.isOpen() ){
+		
+		QSqlQuery query( db_psql );
+		
+		query.prepare("SELECT recipients FROM userforward_view WHERE local_part=:local_part and domain=:domain LIMIT 1");
+		query.bindValue(":local_part", lineEdit_Local_Part->text());
+		query.bindValue(":domain", lineEdit_Domain->text());
+	
+		if( query.exec() ){
+			
+			for(int i = 0; i < query.size(); i++){
+				
+				query.next();
+				list_recipients = query.value(0).toString().split(",");
+				
+				/* Filling the recipients table */
+				for(int j = 0; j < list_recipients.size(); j++){
+					
+					tableWidget_recipients->setRowCount(j + 1);
+					list2_recipients=list_recipients.at(j).split("@");
+					
+					__item0 = new QTableWidgetItem();
+					__item0->setText(list2_recipients.at(0));
+					tableWidget_recipients->setItem(j, 0, __item0);
+					
+					if(list2_recipients.count() > 1){
+						
+						__item1 = new QTableWidgetItem();
+						__item1->setText(list2_recipients.at(1));
+						tableWidget_recipients->setItem(j, 1, __item1);			
+					}else{
+						
+						__item1 = new QTableWidgetItem();
+						__item1->setText(lineEdit_Domain->text());
+						tableWidget_recipients->setItem(j, 1, __item1);
+					}
+				}
+			}
+			
+			query.clear();
+		}else{
+			
+			QMessageBox::warning(this, tr("Query Error"),
+								 query.lastError().text(),
+								 QMessageBox::Ok);
+			query.clear();
+		}
+	}else{
+		
+		this->reject();
+	}
 
+	lineEdit_Local_Part->setReadOnly(true);
+	lineEdit_Domain->setReadOnly(true);
+	
+	connect(pushButton_Add, SIGNAL(clicked()), this, SLOT(NewRow()));
+	connect(pushButton_Deleted, SIGNAL(clicked()), this, SLOT(DeleteRow()));
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(Update()));
+	connect(tableWidget_recipients ,SIGNAL(itemClicked(QTableWidgetItem * )),
+			this, SLOT(SelectRow(QTableWidgetItem * )));
+	
+	tableWidget_recipients->setColumnWidth(0, 230);
+	tableWidget_recipients->setColumnWidth(1, 230);	
 }
 
+/**
+ * Delete new item recipients.
+ */
+void UsersForwardEditDialog::NewRow(){
+	
+	tableWidget_recipients->setRowCount(tableWidget_recipients->rowCount() + 1);
+	
+	QTableWidgetItem *__item0 = new QTableWidgetItem();
+	__item0->setText(tr("login"));
+	tableWidget_recipients->setItem(tableWidget_recipients->rowCount() - 1, 0, __item0);
+	
+	QTableWidgetItem *__item1 = new QTableWidgetItem();
+	__item1->setText(lineEdit_Domain->text());
+	tableWidget_recipients->setItem(tableWidget_recipients->rowCount() - 1, 1, __item1);	
+}
 
+/**
+ * Delete new item recipients.
+ */
+void UsersForwardEditDialog::DeleteRow(){
 
+	if(index != NULL){
+		
+		tableWidget_recipients->removeRow(index->row());
+		index = NULL;
+	}else{
+		
+		tableWidget_recipients->removeRow( tableWidget_recipients->rowCount()-1 );
+	}
+}
+
+/**
+ * Mark a row delete.
+ */
 void UsersForwardEditDialog::SelectRow(QTableWidgetItem *itemTable ){
   
   index = itemTable;
-
 }
 
-
+/**
+ * Update recipients.
+ */
 void UsersForwardEditDialog::Update(){
-  
-  QString recipients;
-  
-  if( Empty_Test() ){
-
-	/*
-	  Create string recipients
-	 */
 	
-	for(int i = 0; i < tableWidget_recipients->rowCount(); i++){
-	  	
-	  recipients.append(tableWidget_recipients->item(i, 0)->text());
-	  recipients.append("@");
-	  recipients.append(tableWidget_recipients->item(i, 1)->text());
-	  
-	  if(tableWidget_recipients->rowCount() != (i + 1)){
+	QString recipients;
+	
+	if( Empty_Test() ){
 		
-		recipients.append(",");
-	  
-	  }
-	  
+		/*Create string recipients*/
+		
+		for(int i = 0; i < tableWidget_recipients->rowCount(); i++){
+			
+			recipients.append(tableWidget_recipients->item(i, 0)->text());
+			recipients.append("@");
+			recipients.append(tableWidget_recipients->item(i, 1)->text());
+			
+			if(tableWidget_recipients->rowCount() != (i + 1)){
+				
+				recipients.append(",");
+			}
+		}
+		
+		TestQuery();
+		
+		if( db_psql.isOpen() ){ 
+			
+			QSqlQuery query( db_psql );
+
+			//Create SQL query
+			query.prepare("UPDATE userforward SET recipients=:recipients WHERE local_part=:local_part and id_domain=get_domain_id(:domain)");
+			
+			query.bindValue(":local_part", lineEdit_Local_Part->text());
+			query.bindValue(":domain", lineEdit_Domain->text());
+			query.bindValue(":recipients", recipients);
+			
+			if( !query.exec() ){
+				
+				QMessageBox::warning(this, tr("Query Error"),
+									 query.lastError().text(),
+									 QMessageBox::Ok);
+				query.clear();
+			}else{
+				
+                /*Update aliases table*/
+				__item0 = pTable->item(pTable->currentRow(), 2);
+				__item0->setText(recipients);
+				query.clear();
+				this->accept();
+			}
+		}else{
+			
+			this->reject();
+		}
 	}
+}
 
-	TestQuery();
-	
-	if( db_psql.isOpen() ){ 
-	  
-	  QSqlQuery query( db_psql );
-
-	  query.prepare("UPDATE userforward SET recipients=:recipients WHERE local_part=:local_part and id_domain=get_domain_id(:domain)");
-	  
-	  query.bindValue(":local_part", lineEdit_Local_Part->text());
-	  query.bindValue(":domain", lineEdit_Domain->text());
-	  query.bindValue(":recipients", recipients);
-	  
-	  if( !query.exec() ){
-		
-		QMessageBox::warning(this, tr("Query Error"),
-							 query.lastError().text(),
-							 QMessageBox::Ok);
-		query.clear();
-		
-	  }else{
-		
-		query.clear();
-		this->accept();
-	  
-	  }
-	  
-	}else{
-	  
-	  this->reject();
-	  
-	}
-	
-  } 
-  
-} 
-
+/**
+ * Checks for empty fields.
+ *
+ * @return
+ * (true) not empty,
+ * (false) empty.
+ */
 bool UsersForwardEditDialog::Empty_Test(){
-  
+
+  //recipients >0
   if(tableWidget_recipients->rowCount() == 0){
 	
-	return false;
-  
+	  return false;  
   }
   
+  //Check recipients fields
   for(int i = 0; i < tableWidget_recipients->rowCount(); i++){
-	
-	if(tableWidget_recipients->item(i, 0)->text().isEmpty()){
 	  
-	  return false;
-	
-	}
-	
-	if(tableWidget_recipients->item(i, 1)->text().isEmpty()){
+	  if(tableWidget_recipients->item(i, 0)->text().isEmpty()){
 	  
-	  return false;
+		  return false;
+	  }
 	
-	}
-	
+	  if(tableWidget_recipients->item(i, 1)->text().isEmpty()){
+		  
+		  return false;
+	  }
   }
   
   return true;
-
 }
 
+/**
+ * Test connection.
+ */
 void UsersForwardEditDialog::TestQuery(){
-
-  QSqlQuery query( db_psql );
-  
-  query.exec("SELECT 1");
-  query.clear();
-  
+	
+	QSqlQuery query( db_psql );
+	
+	query.exec("SELECT 1");
+	query.clear();
 }

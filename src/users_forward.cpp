@@ -205,23 +205,18 @@ void UsersForward::Dialog_Delete_UsersForward(){
 }
 
 void UsersForward::Dialog_Edit_UsersForward(){
-
-  QString Local_Part = ui.tableWidget_UsersForward->item(ui.tableWidget_UsersForward->currentItem()->row(), 0)->text();
-  QString Domain = ui.tableWidget_UsersForward->item(ui.tableWidget_UsersForward->currentItem()->row(), 1)->text();
-  
-  UsersForwardEditDialog *DialogEdit;
-  DialogEdit = new UsersForwardEditDialog(db_psql, Local_Part, Domain);
-  DialogEdit->exec();
-  delete DialogEdit;
-  
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
 	
-	emit DisconnectDB();
+	UsersForwardEditDialog *DialogEdit;
+	DialogEdit = new UsersForwardEditDialog(db_psql, ui.tableWidget_UsersForward);
+	DialogEdit->exec();
+	delete DialogEdit;
 	
-  }
-  
+	TestQuery();
+	
+	if( !db_psql.isOpen() ){
+		
+		emit DisconnectDB();
+	}
 }
 void UsersForward::Dialog_Find_UsersForward(){
 
