@@ -29,24 +29,24 @@
 
 class AliasesEditDialog : public QDialog, private Ui::DialogAddAliases {
     Q_OBJECT
- public:
-  AliasesEditDialog(QSqlDatabase db,QString local_part, QString domain,QWidget *parent=0);
- 
- private slots:
-
-  void Update();
-  void NewRow();
-  void DeleteRow();
-  void SelectRow ( QTableWidgetItem *itemTable );
- 
- private:
-  QTableWidgetItem *__item0;
-  QTableWidgetItem *__item1;
-  QTableWidgetItem *index;
-  QSqlDatabase db_psql;
-  bool Empty_Test();
-  void TestQuery();
-  
+public:
+	AliasesEditDialog(QSqlDatabase db, QTableWidget *Table, QWidget *parent=0);
+																			  
+private slots:
+	
+	void Update();
+	void NewRow();
+	void DeleteRow();
+	void SelectRow ( QTableWidgetItem *itemTable );
+	
+private:
+	QTableWidget *pTable;
+	QTableWidgetItem *__item0;
+	QTableWidgetItem *__item1;
+	QTableWidgetItem *index;
+	QSqlDatabase db_psql;
+	bool Empty_Test();
+	void TestQuery();	
 };
 
 

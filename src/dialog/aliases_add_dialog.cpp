@@ -29,180 +29,205 @@
 #include <QString>
 #include <QTableWidgetItem>
 
-AliasesAddDialog::AliasesAddDialog(QSqlDatabase db, QWidget *parent)
-        : QDialog(parent) {
-
-  db_psql = db;
-
-  setupUi( this );
-  
-  alpha = new QRegExp("-?[a-z.\\-_0-9]+");
-  ValLocal_Part = new QRegExpValidator(*alpha, this);
-  
-  connect(pushButton_Add, SIGNAL(clicked()), this, SLOT(NewRow()));
-  connect(pushButton_Deleted, SIGNAL(clicked()), this, SLOT(DeleteRow()));
-  connect(buttonBox, SIGNAL(accepted()), this, SLOT(Add()));
-
-  lineEdit_Local_Part->setValidator(ValLocal_Part);
-  tableWidget_recipients->setColumnWidth(0, 230);
-  tableWidget_recipients->setColumnWidth(1, 230);
-
-  completer = new QCompleter(this);
-  lineEdit_Domain->setCompleter(completer);
+/**
+ * Create aliases add dialog.
+ *
+ * @param
+ * (db)Connection database.
+ * (*Table) Pointer to table aliases.
+ *
+ * @return
+ *  accept or reject
+ */
+AliasesAddDialog::AliasesAddDialog(QSqlDatabase db, QTableWidget *Table,QWidget *parent)
+	: QDialog(parent) {
+	
+	db_psql = db;
+	pTable = Table;
+	
+	setupUi( this );
+	
+	alpha = new QRegExp("-?[a-z.\\-_0-9]+");
+	ValLocal_Part = new QRegExpValidator(*alpha, this);
+	
+	connect(pushButton_Add, SIGNAL(clicked()), this, SLOT(NewRow()));
+	connect(pushButton_Deleted, SIGNAL(clicked()), this, SLOT(DeleteRow()));
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(Add()));
+	
+	lineEdit_Local_Part->setValidator(ValLocal_Part);
+	tableWidget_recipients->setColumnWidth(0, 230);
+	tableWidget_recipients->setColumnWidth(1, 230);
+	
+	completer = new QCompleter(this);
+	lineEdit_Domain->setCompleter(completer);
 }
 
 AliasesAddDialog::~AliasesAddDialog(){
 
-  delete completer;
-  delete alpha;
-  delete ValLocal_Part;
+	delete completer;
+	delete alpha;
+	delete ValLocal_Part;
 }
 
+/**
+ * Create new item recipients.
+ */
 void AliasesAddDialog::NewRow(){
-  
-  tableWidget_recipients->setRowCount(tableWidget_recipients->rowCount() + 1);
-
-  QTableWidgetItem *__item0 = new QTableWidgetItem();
-  __item0->setText(tr(""));
-  tableWidget_recipients->setItem(tableWidget_recipients->rowCount() - 1, 0, __item0);
-
-  QTableWidgetItem *__item1 = new QTableWidgetItem();
-  __item1->setText(tr(""));
-  tableWidget_recipients->setItem(tableWidget_recipients->rowCount() - 1, 0, __item1);
-
+	
+	tableWidget_recipients->setRowCount(tableWidget_recipients->rowCount() + 1);
+	
+	QTableWidgetItem *__item0 = new QTableWidgetItem();
+	__item0->setText("login");
+	tableWidget_recipients->setItem(tableWidget_recipients->rowCount() - 1, 0, __item0);
+	
+	QTableWidgetItem *__item1 = new QTableWidgetItem();
+	__item1->setText(lineEdit_Domain->text());
+	tableWidget_recipients->setItem(tableWidget_recipients->rowCount() - 1, 1, __item1);  
 }
 
+/**
+ * Delete item recipients.
+ */
 void AliasesAddDialog::DeleteRow(){
   
-  tableWidget_recipients->removeRow(tableWidget_recipients->rowCount() - 1);
-
+	tableWidget_recipients->removeRow(tableWidget_recipients->rowCount() - 1);
 }
 
-
+/**
+ * Create new aliases.
+ */
 void AliasesAddDialog::Add(){
-  
-  QString recipients;
-  
-  if( Empty_Test() ){
-
-
+	
+	QString recipients;
+	if( Empty_Test() ){
+		
 	/*
 	  Create string recipients
 	*/
-	for(int i = 0; i < tableWidget_recipients->rowCount(); i++){
-	  	
-	  recipients.append(tableWidget_recipients->item(i, 0)->text());
-	  recipients.append("@");
-	  recipients.append(tableWidget_recipients->item(i, 1)->text());
-	  
-	  if(tableWidget_recipients->rowCount() != (i + 1)){
+		for(int i = 0; i < tableWidget_recipients->rowCount(); i++){
+			
+			recipients.append(tableWidget_recipients->item(i, 0)->text());
+			recipients.append("@");
+			recipients.append(tableWidget_recipients->item(i, 1)->text());
+			if(tableWidget_recipients->rowCount() != (i + 1)){
+				
+				recipients.append(",");
+			}
+			
+		}
 		
-		recipients.append(",");
-	  
-	  }
-	  
+		TestQuery();
+		
+		if( db_psql.isOpen() ){ 
+			
+			QSqlQuery query( db_psql );
+
+            //Create SQL query
+			query.prepare("INSERT INTO aliases (local_part,id_domain,recipients)"
+						  "VALUES (:local_part,get_domain_id(:domain),:recipients)");
+			
+			query.bindValue(":local_part", lineEdit_Local_Part->text());
+			query.bindValue(":domain", lineEdit_Domain->text());
+			query.bindValue(":recipients", recipients);			
+
+			if( !query.exec() ){
+				
+				QMessageBox::warning(this, tr("Query Error"),
+									 query.lastError().text(),
+									 QMessageBox::Ok);
+				query.clear();
+			}else{
+				
+				/* Update aliases table.*/
+				pTable->insertRow(0);
+
+				__item0 = new QTableWidgetItem();
+				__item0->setText(lineEdit_Local_Part->text());
+				pTable->setItem(0, 0, __item0);
+				
+				__item1 = new QTableWidgetItem();
+				__item1->setText(lineEdit_Domain->text());
+				pTable->setItem(0, 1, __item1);
+				
+				__item2 = new QTableWidgetItem();
+				__item2->setText(recipients);
+				pTable->setItem(0, 2, __item2);
+				
+				
+				query.clear();
+				this->accept();
+			}
+		}else{
+			
+			this->reject();
+		}	
 	}
-	
-	TestQuery();
-	
-	if( db_psql.isOpen() ){ 
-	  
-	  QSqlQuery query( db_psql );
-	  
-	  query.prepare("INSERT INTO aliases (local_part,id_domain,recipients)"
-					"VALUES (:local_part,get_domain_id(:domain),:recipients)");
-	  
-	  query.bindValue(":local_part", lineEdit_Local_Part->text());
-	  query.bindValue(":domain", lineEdit_Domain->text());
-	  query.bindValue(":recipients", recipients);
-	  
-	  if( !query.exec() ){
-		
-		QMessageBox::warning(this, tr("Query Error"),
-							 query.lastError().text(),
-							 QMessageBox::Ok);
-		query.clear();
-	  
-	  }else{
-		
-		query.clear();
-		this->accept();
-		
-	  }
-	  
-	}else{
-	  
-	  this->reject();
-	  
-	}
-	
-  }
- 
 } 
 
-
-
+/**
+ * Checks for empty fields.
+ *
+ * @return
+ * (true) not empty,
+ * (false) empty.
+ */
 bool AliasesAddDialog::Empty_Test(){
   
- QPalette pal;
- 
- lineEdit_Local_Part->setPalette(QApplication::palette());
- lineEdit_Domain->setPalette(QApplication::palette());
+	QPalette pal;
+	
+	lineEdit_Local_Part->setPalette(QApplication::palette());
+	lineEdit_Domain->setPalette(QApplication::palette());
+	
+	pal.setColor(QPalette::Base, Qt::red);
+	
+	if(lineEdit_Domain->text().isEmpty()){//Checks for empty field domain.		
+		
+		lineEdit_Domain->setPalette(pal);		
+	}else if(lineEdit_Local_Part->text().isEmpty()){//Checks for empty field Local Part.
+		
+		lineEdit_Local_Part->setPalette(pal);
+	}else{
 
- pal.setColor(QPalette::Base, Qt::red);
+		//recipients >0
+		if(tableWidget_recipients->rowCount() == 0){
+			
+			return false;
+		}
 
- if(lineEdit_Domain->text().isEmpty()){
-   
-   lineEdit_Domain->setPalette(pal);
-   
- }else if(lineEdit_Local_Part->text().isEmpty()){
-   
-   lineEdit_Local_Part->setPalette(pal);
- 
- }else{
-   
-   if(tableWidget_recipients->rowCount() == 0){
-	 
-	 return false;
-   
-   }
-    
-   for(int i = 0; i < tableWidget_recipients->rowCount(); i++){
-	 
-	 if(tableWidget_recipients->item(i, 0)->text().isEmpty()){
-	   
-	   return false;
-	 
-	 }
-	 
-	 if(tableWidget_recipients->item(i, 1)->text().isEmpty()){
-	   
-	   return false;
-	   
-	 }
-	 
-   }
-   
-   return true;
- 
- }
- 
+		//Check recipients fields
+		for(int i = 0; i < tableWidget_recipients->rowCount(); i++){
+			
+			if(tableWidget_recipients->item(i, 0)->text().isEmpty()){
+				return false;
+			}
+			
+			if(tableWidget_recipients->item(i, 1)->text().isEmpty()){
+				return false;
+			}
+			
+		}
+		
+		return true;	
+	}
+	
   return false;
-  
 }
 
-
+/**
+ * Test connection.
+ */
 void AliasesAddDialog::TestQuery(){
-
-  QSqlQuery query( db_psql );
-  
-  query.exec("SELECT 1");
-  query.clear();
-  
+	
+	QSqlQuery query( db_psql );
+	
+	query.exec("SELECT 1");
+	query.clear();	
 }
 
+/**
+ * Function sets the list of domains
+ */
 void AliasesAddDialog::setCompleterModel(QAbstractItemModel *model){
-
-  completer->setModel(model);
-  
+	
+	completer->setModel(model);
 }

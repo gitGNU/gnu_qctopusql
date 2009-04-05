@@ -44,34 +44,35 @@
 
 class Aliases : public QWidget
 {
-  Q_OBJECT
-  
+	Q_OBJECT
+	
 public:
-  
-  Aliases(QSqlDatabase db, QWidget *parent);
-  QSqlDatabase db_psql;
-  void SetCompleterList(QStringList list);
-  QStringListModel * completerModel;							 
-										 
+	
+	Aliases(QSqlDatabase db, QWidget *parent);
+	QSqlDatabase db_psql;
+	void SetCompleterList(QStringList list);
+	
+	/** A list of existing domains*/
+	QStringListModel * completerModel;							 
+									 
 private slots:
-  void GetAliases();
-  void Dialog_Add_Aliases();
-  void Dialog_Delete_Aliases();
-  void Dialog_Edit_Aliases();
-  void Dialog_Find_Aliases();
-  void showContextMenu(const QPoint &point);
-  
+	void GetAliases();
+	void Dialog_Add_Aliases();
+	void Dialog_Delete_Aliases();
+	void Dialog_Edit_Aliases();
+	void Dialog_Find_Aliases();
+	void showContextMenu(const QPoint &point);
+	
 private:
-  Ui::Aliases ui;
-  
-  QCompleter *completer;
-  QTableWidgetItem *__item0;
-  QTableWidgetItem *__item1;
-  QTableWidgetItem *__item2;
-  void TestQuery();
-  
+	Ui::Aliases ui;
+	QCompleter *completer;
+	QTableWidgetItem *__item0;
+	QTableWidgetItem *__item1;
+	QTableWidgetItem *__item2;
+	void TestQuery();
+	
 signals:
-  void DisconnectDB();
+	void DisconnectDB();
   
 };
 

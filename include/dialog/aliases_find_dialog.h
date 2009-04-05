@@ -36,8 +36,7 @@ class AliasesFindDialog : public QDialog, private Ui::AliasesDialogFind {
   ~AliasesFindDialog();
   void setCompleterModel(QAbstractItemModel *model);
   QSqlDatabase db_psql;
-  QString Local_Part;
-  QString Domain;
+
 				
  private slots:
   void Find();

@@ -26,21 +26,26 @@
 #include <QString>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QTableWidget>
 #include "ui_aliases_delete_dialog.h"
 
 
 class AliasesDeleteDialog : public QDialog, private Ui::DialogAliasesDelete {
     Q_OBJECT
- public:
-  AliasesDeleteDialog (QSqlDatabase db, QString local_part, QString domain);
- 
- private slots:
-  void Delete();
-  
- private:
-  QSqlDatabase db_psql;
-  void TestQuery();
-  
+public:
+	AliasesDeleteDialog (QSqlDatabase db, QTableWidget *Table);
+															  
+private slots:
+	void Delete();
+	
+private:
+	QTableWidget *pTable;
+    //QTableWidgetItem *Table;
+	QSqlDatabase db_psql;
+	void TestQuery();
+    //int CurrentRow;
+//signals:
+//	void AliasesDelete(int row);
 };
 
 

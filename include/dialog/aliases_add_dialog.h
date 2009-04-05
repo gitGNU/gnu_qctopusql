@@ -31,27 +31,30 @@
 
 class AliasesAddDialog : public QDialog, private Ui::DialogAddAliases {
     Q_OBJECT
- public:
-  AliasesAddDialog(QSqlDatabase db,QWidget *parent=0);
-  ~AliasesAddDialog();
-  void setCompleterModel(QAbstractItemModel *model);
-												   
- private slots:
-  void Add();
-  void NewRow();
-  void DeleteRow();
-
- 
- private:
-
-  QRegExp *alpha;
-  QValidator *ValLocal_Part;
-  QCompleter *completer;
-  QModelIndex index;
-  QSqlDatabase db_psql;
-  bool Empty_Test();
-  void TestQuery();
-  
+public:
+	AliasesAddDialog(QSqlDatabase db, QTableWidget *Table, QWidget *parent=0);
+	~AliasesAddDialog();
+	void setCompleterModel(QAbstractItemModel *model);
+													 
+private slots:
+	
+	void Add();
+	void NewRow();
+	void DeleteRow();
+	
+private:
+	
+	QTableWidgetItem *__item0;
+	QTableWidgetItem *__item1;
+	QTableWidgetItem *__item2;
+	QTableWidget *pTable;
+	QRegExp *alpha;
+	QValidator *ValLocal_Part;
+	QCompleter *completer;
+	QModelIndex index;
+	QSqlDatabase db_psql;
+	bool Empty_Test();
+	void TestQuery();
 };
 
 
