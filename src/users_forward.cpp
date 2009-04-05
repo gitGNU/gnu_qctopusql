@@ -167,21 +167,19 @@ void UsersForward::showContextMenu(const QPoint &point){
 }
 
 void UsersForward::Dialog_Add_UsersForward(){
-  
-  UsersForwardAddDialog *DialogAdd;
-  DialogAdd = new UsersForwardAddDialog( db_psql );
-  DialogAdd->setCompleterModel( completerModel );
-  DialogAdd->exec();
-  delete DialogAdd;
-
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
 	
-	emit DisconnectDB();
+	UsersForwardAddDialog *DialogAdd;
+	DialogAdd = new UsersForwardAddDialog( db_psql, ui.tableWidget_UsersForward);
+	DialogAdd->setCompleterModel( completerModel );
+	DialogAdd->exec();
+	delete DialogAdd;
 	
-  }
-  
+	TestQuery();
+	
+	if( !db_psql.isOpen() ){
+		
+		emit DisconnectDB();
+	}
 }
 
 void UsersForward::Dialog_Delete_UsersForward(){

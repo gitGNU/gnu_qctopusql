@@ -29,24 +29,27 @@
 
 class UsersForwardAddDialog : public QDialog, private Ui::DialogAddUsersForward {
     Q_OBJECT
- public:
-  UsersForwardAddDialog(QSqlDatabase db,QWidget *parent=0);
-  ~UsersForwardAddDialog();
-  void setCompleterModel(QAbstractItemModel *model);													  
-														  
- private slots:
-  void Add();
-  void NewRow();
-  void DeleteRow();
+	
+public:
 
- 
- private:
-  QCompleter *completer;
-  QModelIndex index;
-  QSqlDatabase db_psql;
-  bool Empty_Test();
-  void TestQuery();
-	  
+	UsersForwardAddDialog(QSqlDatabase db, QTableWidget *Table, QWidget *parent=0);
+	~UsersForwardAddDialog();
+	void setCompleterModel(QAbstractItemModel *model);													  
+													 
+private slots:
+	
+	void Add();
+	void NewRow();
+	void DeleteRow();
+	
+private:
+
+	QTableWidget *pTable;
+	QCompleter *completer;
+	QModelIndex index;
+	QSqlDatabase db_psql;
+	bool Empty_Test();
+	void TestQuery();
 };
 
 

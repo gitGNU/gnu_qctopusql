@@ -124,7 +124,7 @@ UsersForwardEditDialog::UsersForwardEditDialog(QSqlDatabase db,  QTableWidget *T
 }
 
 /**
- * Delete new item recipients.
+ * Create new item recipients.
  */
 void UsersForwardEditDialog::NewRow(){
 	
@@ -140,7 +140,7 @@ void UsersForwardEditDialog::NewRow(){
 }
 
 /**
- * Delete new item recipients.
+ * Delete item recipients.
  */
 void UsersForwardEditDialog::DeleteRow(){
 
