@@ -25,27 +25,34 @@
 #include <QSqlDatabase>
 #include <QCompleter>
 #include <QAbstractItemModel>
+#include <QTableWidget>
 #include "ui_users_add_dialog.h"
 
 class UsersAddDialog : public QDialog, private Ui::DialogAdd {
-  Q_OBJECT
-
+	Q_OBJECT
+	
 public:
-  UsersAddDialog(QSqlDatabase db,QWidget *parent=0);
-  ~UsersAddDialog();
-  void setCompleterModel(QAbstractItemModel *model);											   
-
+	
+	UsersAddDialog(QSqlDatabase db, QTableWidget *Table, QWidget *parent=0);
+	~UsersAddDialog();
+	void setCompleterModel(QAbstractItemModel *model);											   
+													 
 private slots:
-  void Add();
- 
- private:
-  QSqlDatabase db_psql;
-  bool Empty_Test();
-  QCompleter *completer;
-  
-//signals:
-//  void DisconnectDB();
-
+	
+	void Add();
+	
+private:
+	
+	QTableWidget *pTable;
+	QTableWidgetItem *__item0;
+	QTableWidgetItem *__item1;
+	QTableWidgetItem *__item2;
+	QTableWidgetItem *__item3;
+	QTableWidgetItem *__item4;
+	QSqlDatabase db_psql;
+	bool Empty_Test();
+	QCompleter *completer;
+	
 };
 
 #endif

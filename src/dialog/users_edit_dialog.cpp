@@ -145,8 +145,6 @@ bool  UsersEditDialog::Empty_Test(){
  
 }
 
-
-
 void UsersEditDialog::Edit(){
 
   if( Empty_Test() ){
