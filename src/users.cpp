@@ -218,22 +218,20 @@ void User::showContextMenu(const QPoint &point){
 
 
 void User::Dialog_Add_User(){
-  
-  UsersAddDialog *AddDialog;
-  AddDialog = new UsersAddDialog( db_psql );
-  AddDialog->setCompleterModel( completerModel );
-  AddDialog->exec();
-
-  delete AddDialog;
-
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
 	
-	emit DisconnectDB();
-
-  }
-
+	UsersAddDialog *AddDialog;
+	AddDialog = new UsersAddDialog(db_psql, UserTable);
+	AddDialog->setCompleterModel( completerModel );
+	AddDialog->exec();
+	
+	delete AddDialog;
+	
+	TestQuery();
+	
+	if( !db_psql.isOpen() ){
+	
+		emit DisconnectDB();
+	}
 }
 
 void User::DialogFind(){

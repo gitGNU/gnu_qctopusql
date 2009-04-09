@@ -140,7 +140,7 @@ void AliasesAddDialog::Add(){
 				
 				/* Update aliases table.*/
 				pTable->insertRow(0);
-
+				
 				__item0 = new QTableWidgetItem();
 				__item0->setText(lineEdit_Local_Part->text());
 				pTable->setItem(0, 0, __item0);

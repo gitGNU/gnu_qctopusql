@@ -50,7 +50,7 @@ FindDialog::FindDialog(QSqlDatabase db, QWidget *parent)
 }
 
 FindDialog::~FindDialog(){
-
+		
   delete completer;
 }
 
