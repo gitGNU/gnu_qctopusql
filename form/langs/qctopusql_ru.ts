@@ -869,7 +869,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../src/main_window.cpp" line="52"/>
         <source>Users</source>
-        <translation>Пользаватели</translation>
+        <translation>Пользователи</translation>
     </message>
     <message>
         <location filename="../../src/main_window.cpp" line="53"/>
