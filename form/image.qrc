@@ -2,6 +2,9 @@
   <qresource prefix="plus" >
     <file>images/plus.png</file>
   </qresource>
+  <qresource prefix="show" >
+    <file>images/show.png</file>
+  </qresource>
   <qresource prefix="logo_64" >
     <file>images/logo/logo_64.png</file>
   </qresource>

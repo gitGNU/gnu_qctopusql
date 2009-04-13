@@ -41,32 +41,36 @@
 
 class MainWindow : public QWidget
 {
-  Q_OBJECT
-  
+	Q_OBJECT
+	
 public:
-  
-  MainWindow (QWidget *parent = 0);
-  ~MainWindow();
-  QSqlDatabase db;
- 
+	
+	MainWindow (QWidget *parent = 0);
+	~MainWindow();
+	QSqlDatabase db;
+	
 private:
-  Ui::Login ui;
+	
+	Ui::Login ui;
 
-  QHBoxLayout *layout;
-  QWidget *LoginWidget;
-  QTabWidget *Tab;
-  User *UserWidget;
-  Aliases *AliasesWidget;
-  UsersForward *UsersForwardWidget;
-  Domains *DomainsWidget;			  
-  int GetAllDomains();
-  int GetTypeDomains();
-					  
+	QPushButton *pushButton_uHide;
+	QHBoxLayout *layout, *layoutLogin;
+	QWidget *LoginWidget;
+	QTabWidget *Tab;
+	User *UserWidget;
+	Aliases *AliasesWidget;
+	UsersForward *UsersForwardWidget;
+	Domains *DomainsWidget;			  
+	int GetAllDomains();
+	int GetTypeDomains();
+						
 private slots:
-  void About();
-  void DialogProfiles();
-  void ConnectDB();
-  void DisconnectDB();
+
+	void HideLogin();
+	void About();
+	void DialogProfiles();
+	void ConnectDB();
+	void DisconnectDB();
 };
 
 #endif

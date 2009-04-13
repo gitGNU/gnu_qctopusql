@@ -200,6 +200,13 @@
      </property>
     </spacer>
    </item>
+   <item>
+    <widget class="QPushButton" name="pushButton_Hide" >
+     <property name="text" >
+      <string>&lt;&lt;&lt; Hide</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources>
