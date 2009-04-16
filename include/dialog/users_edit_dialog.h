@@ -22,20 +22,34 @@
 
 #include <QDialog>
 #include <QSqlDatabase>
+#include <QTableWidget>
+#include <QTableWidgetItem>
+#include <QColor>
 #include "ui_users_edit_dialog.h"
 
 class UsersEditDialog : public QDialog, private Ui::DialogEdit {
+
     Q_OBJECT
- public:
-  UsersEditDialog(QSqlDatabase db,QString login, QString domain,bool RaedOnly, QWidget *parent=0);
- 
- private slots:
-  void Edit();
- 
- private:
-  QSqlDatabase db_psql;
-  bool Empty_Test();
-  void TestQuery();
+
+public:
+
+	UsersEditDialog(QSqlDatabase db,QTableWidget *Table,bool RaedOnly, QWidget *parent=0);
+																						 
+private slots:
+	
+	void Edit();
+	
+private:
+	
+	QTableWidget *pTable;
+	QTableWidgetItem *__item0;
+	QTableWidgetItem *__item1;
+	QTableWidgetItem *__item2;
+	QTableWidgetItem *__item3;
+	QTableWidgetItem *__item4;
+	QSqlDatabase db_psql;
+	bool Empty_Test();
+	void TestQuery();
 };
 
 #endif

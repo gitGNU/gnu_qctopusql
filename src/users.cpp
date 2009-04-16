@@ -255,23 +255,17 @@ void User::DialogFind(){
 
 void User::Dialog_Edit_Users(){
 
-  QString Login = UserTable->item(UserTable->currentItem()->row(), 0)->text();
-  QString Domain = UserTable->item(UserTable->currentItem()->row(), 1)->text();
-  
-  UsersEditDialog *DialogEdit;
-  DialogEdit = new UsersEditDialog(db_psql, Login, Domain, false);
-  DialogEdit->exec();
-
-  delete DialogEdit;
-  
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
+	UsersEditDialog *DialogEdit;
+	DialogEdit = new UsersEditDialog(db_psql, UserTable, false);
+	DialogEdit->exec();
 	
-	emit DisconnectDB();
+	delete DialogEdit;
+	TestQuery();
 	
-  }
-  
+	if( !db_psql.isOpen() ){
+		
+		emit DisconnectDB();
+	}
 }
 
 void User::Dialog_Delete_Users(){
@@ -295,24 +289,18 @@ void User::Dialog_Delete_Users(){
 }
 
 void User::Dialog_Info_Users(){
- 
-  QString Login = UserTable->item(UserTable->currentItem()->row(), 0)->text();
-  QString Domain = UserTable->item(UserTable->currentItem()->row(), 1)->text();
-
-  UsersEditDialog *DialogEdit;
-  DialogEdit = new UsersEditDialog(db_psql, Login, Domain, true);
-  DialogEdit->exec();
-
-  delete DialogEdit;
-  
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
 	
-	emit DisconnectDB();
+	UsersEditDialog *DialogEdit;
+	DialogEdit = new UsersEditDialog(db_psql, UserTable, true);
+	DialogEdit->exec();
 	
-  }
-
+	delete DialogEdit;
+	TestQuery();
+	
+	if( !db_psql.isOpen() ){
+		
+		emit DisconnectDB();
+	}
 }
 
 void User::TestQuery(){

@@ -208,46 +208,32 @@ void FindDialog::DialogDelete(){
 
 void FindDialog::DialogEdit(){
 
-  
-  QString Login = tableWidget_Find->item(tableWidget_Find->currentItem()->row(), 0)->text();
-  QString Domain = tableWidget_Find->item(tableWidget_Find->currentItem()->row(), 2)->text();
-
-  UsersEditDialog *DialogEdit;
-  DialogEdit = new UsersEditDialog(db_psql, Login, Domain, false);
-  DialogEdit->exec();
-  
-  delete DialogEdit;
-  
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
+	UsersEditDialog *DialogEdit;
+	DialogEdit = new UsersEditDialog(db_psql, tableWidget_Find, false);
+	DialogEdit->exec();
 	
-	this->reject();
+	delete DialogEdit;
+	TestQuery();
 	
-  }
-
-
-  
+	if( !db_psql.isOpen() ){
+		
+		this->reject();
+	}
 }
+
 void FindDialog::DialogInfo(){
-
-  QString Login = tableWidget_Find->item(tableWidget_Find->currentItem()->row(), 0)->text();
-  QString Domain = tableWidget_Find->item(tableWidget_Find->currentItem()->row(), 2)->text();
-
-  UsersEditDialog *DialogEdit;
-  DialogEdit = new UsersEditDialog(db_psql, Login, Domain, true);
-  DialogEdit->exec();
-  
-  delete DialogEdit;
-  
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
 	
-	this->reject();
+	UsersEditDialog *DialogEdit;
+	DialogEdit = new UsersEditDialog(db_psql, tableWidget_Find, true);
+	DialogEdit->exec();
 	
-  }
-  
+	delete DialogEdit;
+	TestQuery();
+	
+	if( !db_psql.isOpen() ){
+		
+		this->reject();
+	}
 }
 
 void FindDialog::TestQuery(){
