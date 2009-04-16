@@ -182,50 +182,6 @@ void FindDialog::showContextMenu(const QPoint &point){
 		Pop_up.exec(QCursor::pos());
 	}
 }
-/**
- * Function creates a context menu at the point
- * of pressing the right button on the table.
- * @param
- * (const QPoint & point)
- *  point of pressing
- */
-void FindDialog::showContextMenu(const QPoint &point){
-	
-	tableWidget_Find->setCurrentItem(tableWidget_Find->itemAt(point));
-	
-	if(tableWidget_Find->indexAt(point).row() != -1){
-		
-		QMenu Pop_up;
-		
-		connect(Pop_up.addAction(tr("Info User")), SIGNAL(triggered()), this, SLOT(DialogInfo()));
-		connect(Pop_up.addAction(tr("Delete User")), SIGNAL(triggered()), this, SLOT(DialogDelete()));
-		connect(Pop_up.addAction(tr("Edit User")), SIGNAL(triggered()), this, SLOT(DialogEdit()));
-		
-		Pop_up.exec(QCursor::pos());
-	}
-}
-/**
- * Function creates a context menu at the point
- * of pressing the right button on the table.
- * @param
- * (const QPoint & point)
- *  point of pressing
- */
-void FindDialog::showContextMenu(const QPoint &point){
-	
-	tableWidget_Find->setCurrentItem(tableWidget_Find->itemAt(point));
-	
-	if(tableWidget_Find->indexAt(point).row() != -1){
-		
-		QMenu Pop_up;
-		
-		connect(Pop_up.addAction(tr("Info User")), SIGNAL(triggered()), this, SLOT(DialogInfo()));
-		connect(Pop_up.addAction(tr("Delete User")), SIGNAL(triggered()), this, SLOT(DialogDelete()));
-		connect(Pop_up.addAction(tr("Edit User")), SIGNAL(triggered()), this, SLOT(DialogEdit()));
-		
-		Pop_up.exec(QCursor::pos());
-	}
-}
 
 /**
  * Call dialog delete user.

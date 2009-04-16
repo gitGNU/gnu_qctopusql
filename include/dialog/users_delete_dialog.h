@@ -35,7 +35,7 @@ class UsersDeleteDialog : public QDialog, private Ui::DialogDelete {
 
 public:
 
-	UsersDeleteDialog (QSqlDatabase db, QTableWidget *Table);
+	UsersDeleteDialog(QSqlDatabase db, QTableWidget *Table);
  
 private slots:
 

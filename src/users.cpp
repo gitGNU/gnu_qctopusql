@@ -274,12 +274,9 @@ void User::Dialog_Edit_Users(){
  * Call dialog delete user.
  */
 void User::Dialog_Delete_Users(){
- 
-  QString Login = UserTable->item(UserTable->currentItem()->row(), 0)->text();
-  QString Domain = UserTable->item(UserTable->currentItem()->row(), 1)->text();
-  
+
   UsersDeleteDialog *DialogDelete;
-  DialogDelete = new UsersDeleteDialog(db_psql, Login, Domain);
+  DialogDelete = new UsersDeleteDialog(db_psql, UserTable);
   DialogDelete->exec();
   delete DialogDelete;
   
