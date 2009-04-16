@@ -26,20 +26,25 @@
 #include <QString>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QTableWidget>
 #include "ui_users_delete_dialog.h"
 
-
 class UsersDeleteDialog : public QDialog, private Ui::DialogDelete {
-    Q_OBJECT
- public:
-  UsersDeleteDialog (QSqlDatabase db, QString login, QString domain);
- 
- private slots:
-  void Delete();
-  
- private:
-  QSqlDatabase db_psql;
 
+	Q_OBJECT
+
+public:
+
+	UsersDeleteDialog (QSqlDatabase db, QTableWidget *Table);
+ 
+private slots:
+
+	void Delete();
+  
+private:
+
+	QTableWidget *pTable;
+	QSqlDatabase db_psql;
 };
 
 

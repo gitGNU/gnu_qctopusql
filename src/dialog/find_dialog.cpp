@@ -32,180 +32,222 @@
 #include <users_delete_dialog.h>
 #include <users_edit_dialog.h>
 
-
+/**
+ * Create user find dialog.
+ *
+ * @param
+ * (db)Connection database.
+ *
+ * @return
+ *  accept or reject
+ */
 FindDialog::FindDialog(QSqlDatabase db, QWidget *parent)
-        : QDialog(parent) {
-  
-  db_psql=db;
-
-  setupUi( this );
-
-
-  connect(pushButton_Find, SIGNAL(clicked()), this, SLOT(Find()));
-  connect(checkBox, SIGNAL(clicked(bool)), lineEdit_Domain, SLOT(setEnabled(bool)));
-  connect(tableWidget_Find, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
-
-  completer = new QCompleter(this);
-  lineEdit_Domain->setCompleter(completer);
+	: QDialog(parent) {
+	
+	db_psql=db;
+	setupUi( this );
+	
+	connect(pushButton_Find, SIGNAL(clicked()), this, SLOT(Find()));
+	connect(checkBox, SIGNAL(clicked(bool)), lineEdit_Domain, SLOT(setEnabled(bool)));
+	connect(tableWidget_Find, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+	
+	completer = new QCompleter(this);
+	lineEdit_Domain->setCompleter(completer);
 }
 
 FindDialog::~FindDialog(){
-		
-  delete completer;
+	
+	delete completer;
 }
 
-bool FindDialog::Empty_Test(){
-
-  return true;
-
-}
-
+/**
+ * Search users.
+ */
 void FindDialog::Find(){
+	
+	QString StringFind;
+	QString StringDomain;
+	bool ok;
+	QColor ColorItem(0, 0, 0);
 
-  QString StringFind;
-  QString StringDomain;
-  bool ok;
-  QColor ColorItem(0, 0, 0);
-  
-  if( lineEdit_Domain->isEnabled() ){
-	
-	StringDomain.append("%");
-	StringDomain.append(lineEdit_Domain->text());
-	StringDomain.append("%");
-  
-  }else{
-	
-	StringDomain="%%";
-  
-  }
-
-  QSqlQuery query( db_psql );
-  
-  query.exec("SELECT 1");
-  query.clear();
-  
-  StringFind.append("%");
-  StringFind.append(lineEdit_Find->text());
-  StringFind.append("%");
-  
-  if( db_psql.isOpen() ){ 
-
-	if(tableWidget_Find->isSortingEnabled()){
-	  
-	  tableWidget_Find->setSortingEnabled(false);
-
-	}
-	
-	tableWidget_Find->clearContents();
-	tableWidget_Find->setRowCount(0);
-	
-	if(comboBox->currentIndex() == 0){
-	  
-	  query.prepare("SELECT login,name,domain,status FROM users_view WHERE login ILIKE :find and domain ILIKE :domain");
-	
+	/*Create string domain*/
+	if( lineEdit_Domain->isEnabled() ){
+		
+		StringDomain.append("%");
+		StringDomain.append(lineEdit_Domain->text());
+		StringDomain.append("%");
 	}else{
-	  
-	  query.prepare("SELECT login,name,domain,status FROM users_view WHERE domain ILIKE :domain and name ILIKE :find ");
-	
-	}
-	
-	query.bindValue(":find", StringFind);
-	query.bindValue(":domain", StringDomain);
-	
-	if( !query.exec() ){
-	  
-	  QMessageBox::warning(this, tr("Query Error"),
-						   query.lastError().text(),
-						   QMessageBox::Ok);
-	  query.clear();
-	  
-	}else{
-	  
-	  tableWidget_Find->setRowCount(query.size());
-	  
-	  for(int i = 0; i < query.size(); i++){
 		
-		query.next();
-		
-		if(query.value(3).toInt(&ok) == 1){
-
-		  ColorItem.setRgb(198, 252, 155);
-
-		}else{
-
-		  ColorItem.setRgb(255, 202, 82);
-
-		}
-		
-		__item0 = new QTableWidgetItem();
-		__item0->setText(query.value(0).toString());
-		__item0->setBackgroundColor(ColorItem);
-		tableWidget_Find->setItem(i, 0, __item0);
-		
-		__item1 = new QTableWidgetItem();
-		__item1->setText(query.value(1).toString());
-		__item1->setBackgroundColor(ColorItem);
-		tableWidget_Find->setItem(i, 1, __item1);
-		
-		__item2 = new QTableWidgetItem();
-		__item2->setText(query.value(2).toString());
-		__item2->setBackgroundColor(ColorItem);
-		tableWidget_Find->setItem(i, 2, __item2);
-		
-	  }
-	  
+		StringDomain="%%";	
 	}
 
-	tableWidget_Find->setSortingEnabled(true);
+	QSqlQuery query( db_psql );
+	
+	query.exec("SELECT 1");
 	query.clear();
 	
-  }else{
-
-	this->reject();
+	StringFind.append("%");
+	StringFind.append(lineEdit_Find->text());
+	StringFind.append("%");
 	
-  }
-  
+	if( db_psql.isOpen() ){ 
+		
+		if(tableWidget_Find->isSortingEnabled()){
+		
+			tableWidget_Find->setSortingEnabled(false);	
+		}
+	
+		tableWidget_Find->clearContents();
+		tableWidget_Find->setRowCount(0);
+
+		/*Creat query*/
+		if(comboBox->currentIndex() == 0){
+			
+			query.prepare("SELECT login,name,domain,status FROM users_view WHERE login ILIKE :find and domain ILIKE :domain");
+		}else{
+			
+			query.prepare("SELECT login,name,domain,status FROM users_view WHERE domain ILIKE :domain and name ILIKE :find ");
+		}
+	
+		query.bindValue(":find", StringFind);
+		query.bindValue(":domain", StringDomain);
+		
+		if( !query.exec() ){
+			
+			QMessageBox::warning(this, tr("Query Error"),
+								 query.lastError().text(),
+								 QMessageBox::Ok);
+			query.clear();
+		}else{
+	  
+			tableWidget_Find->setRowCount(query.size());
+
+            /* Filling the table */
+			for(int i = 0; i < query.size(); i++){
+				
+				query.next();
+				
+				if(query.value(3).toInt(&ok) == 1){
+					
+					ColorItem.setRgb(198, 252, 155);
+				}else{
+
+					ColorItem.setRgb(255, 202, 82);
+				}
+				
+				__item0 = new QTableWidgetItem();
+				__item0->setText(query.value(0).toString());
+				__item0->setBackgroundColor(ColorItem);
+				tableWidget_Find->setItem(i, 0, __item0);
+				
+				__item1 = new QTableWidgetItem();
+				__item1->setText(query.value(1).toString());
+				__item1->setBackgroundColor(ColorItem);
+				tableWidget_Find->setItem(i, 1, __item1);
+				
+				__item2 = new QTableWidgetItem();
+				__item2->setText(query.value(2).toString());
+				__item2->setBackgroundColor(ColorItem);
+				tableWidget_Find->setItem(i, 2, __item2);
+			}	
+		}
+
+		tableWidget_Find->setSortingEnabled(true);
+		query.clear();
+	}else{
+		
+		this->reject();	
+	}
 }
 
+/**
+ * Function creates a context menu at the point
+ * of pressing the right button on the table.
+ * @param
+ * (const QPoint & point)
+ *  point of pressing
+ */
 void FindDialog::showContextMenu(const QPoint &point){
-  
-  tableWidget_Find->setCurrentItem(tableWidget_Find->itemAt(point));
-  
-  if(tableWidget_Find->indexAt(point).row() != -1){
 	
-	QMenu Pop_up;
-
-  	connect(Pop_up.addAction(tr("Info User")), SIGNAL(triggered()), this, SLOT(DialogInfo()));
-  	connect(Pop_up.addAction(tr("Delete User")), SIGNAL(triggered()), this, SLOT(DialogDelete()));
-  	connect(Pop_up.addAction(tr("Edit User")), SIGNAL(triggered()), this, SLOT(DialogEdit()));
+	tableWidget_Find->setCurrentItem(tableWidget_Find->itemAt(point));
 	
-	Pop_up.exec(QCursor::pos());
-  
-  }
-  
+	if(tableWidget_Find->indexAt(point).row() != -1){
+		
+		QMenu Pop_up;
+		
+		connect(Pop_up.addAction(tr("Info User")), SIGNAL(triggered()), this, SLOT(DialogInfo()));
+		connect(Pop_up.addAction(tr("Delete User")), SIGNAL(triggered()), this, SLOT(DialogDelete()));
+		connect(Pop_up.addAction(tr("Edit User")), SIGNAL(triggered()), this, SLOT(DialogEdit()));
+		
+		Pop_up.exec(QCursor::pos());
+	}
+}
+/**
+ * Function creates a context menu at the point
+ * of pressing the right button on the table.
+ * @param
+ * (const QPoint & point)
+ *  point of pressing
+ */
+void FindDialog::showContextMenu(const QPoint &point){
+	
+	tableWidget_Find->setCurrentItem(tableWidget_Find->itemAt(point));
+	
+	if(tableWidget_Find->indexAt(point).row() != -1){
+		
+		QMenu Pop_up;
+		
+		connect(Pop_up.addAction(tr("Info User")), SIGNAL(triggered()), this, SLOT(DialogInfo()));
+		connect(Pop_up.addAction(tr("Delete User")), SIGNAL(triggered()), this, SLOT(DialogDelete()));
+		connect(Pop_up.addAction(tr("Edit User")), SIGNAL(triggered()), this, SLOT(DialogEdit()));
+		
+		Pop_up.exec(QCursor::pos());
+	}
+}
+/**
+ * Function creates a context menu at the point
+ * of pressing the right button on the table.
+ * @param
+ * (const QPoint & point)
+ *  point of pressing
+ */
+void FindDialog::showContextMenu(const QPoint &point){
+	
+	tableWidget_Find->setCurrentItem(tableWidget_Find->itemAt(point));
+	
+	if(tableWidget_Find->indexAt(point).row() != -1){
+		
+		QMenu Pop_up;
+		
+		connect(Pop_up.addAction(tr("Info User")), SIGNAL(triggered()), this, SLOT(DialogInfo()));
+		connect(Pop_up.addAction(tr("Delete User")), SIGNAL(triggered()), this, SLOT(DialogDelete()));
+		connect(Pop_up.addAction(tr("Edit User")), SIGNAL(triggered()), this, SLOT(DialogEdit()));
+		
+		Pop_up.exec(QCursor::pos());
+	}
 }
 
+/**
+ * Call dialog delete user.
+ */
 void FindDialog::DialogDelete(){
-
-  QString Login = tableWidget_Find->item(tableWidget_Find->currentItem()->row(), 0)->text();
-  QString Domain = tableWidget_Find->item(tableWidget_Find->currentItem()->row(), 2)->text();
-
-  UsersDeleteDialog *DialogDelete;
-  DialogDelete = new UsersDeleteDialog(db_psql, Login, Domain);
-  DialogDelete->exec();
-
-  delete DialogDelete;
-  
-  TestQuery();
-  
-  if( !db_psql.isOpen() ){
 	
-	this->reject();
+	UsersDeleteDialog *DialogDelete;
+	DialogDelete = new UsersDeleteDialog(db_psql, tableWidget_Find);
+	DialogDelete->exec();
 	
-  }
-  
+	delete DialogDelete;
+	TestQuery();
+	
+	if( !db_psql.isOpen() ){
+	
+		this->reject();
+	}
 }
 
+/**
+ * Call dialog delete edit.
+ */
 void FindDialog::DialogEdit(){
 
 	UsersEditDialog *DialogEdit;
@@ -221,6 +263,9 @@ void FindDialog::DialogEdit(){
 	}
 }
 
+/**
+ * Call dialog delete info.
+ */
 void FindDialog::DialogInfo(){
 	
 	UsersEditDialog *DialogEdit;
@@ -236,17 +281,21 @@ void FindDialog::DialogInfo(){
 	}
 }
 
+/**
+ * Test connection.
+ */
 void FindDialog::TestQuery(){
-
-  QSqlQuery query( db_psql );
-  
-  query.exec("SELECT 1");
-  query.clear();
-   
+	
+	QSqlQuery query( db_psql );
+	
+	query.exec("SELECT 1");
+	query.clear();
 }
 
+/**
+ * Function sets the list of domains
+ */
 void FindDialog::setCompleterModel(QAbstractItemModel *model){
-
-  completer->setModel(model);
-  
+	
+	completer->setModel(model);
 }

@@ -21,50 +21,59 @@
 #include <QMessageBox>
 #include <QString>
 
+/**
+ * Create users delete dialog.
+ *
+ * @param
+ * (db) Connection database.
+ * (*Table) Pointer to table aliases
+ *
+ * @return
+ *  accept or reject
+ */
+UsersDeleteDialog::UsersDeleteDialog (QSqlDatabase db, QTableWidget *Table){
 
-UsersDeleteDialog::UsersDeleteDialog (QSqlDatabase db, QString login, QString domain){
-  
-  db_psql = db;
-  setupUi( this );
-
-  lineEdit_Login->setText(login);
-  lineEdit_Domain->setText(domain);
-  connect(buttonBox,SIGNAL(accepted()),this,SLOT(Delete()));
-
+	pTable = Table;
+	db_psql = db;
+	setupUi( this );
+	
+	lineEdit_Login->setText(pTable->item(pTable->currentRow(), 0)->text());
+	lineEdit_Domain->setText(pTable->item(pTable->currentRow(), 1)->text());
+	connect(buttonBox,SIGNAL(accepted()),this,SLOT(Delete()));
 }
 
+/**
+ * Delete user.
+ */
 void UsersDeleteDialog::Delete(){
-
-  QSqlQuery query( db_psql );
-  
-  query.exec("SELECT 1");  
-  query.clear();
-
-  if( db_psql.isOpen() ){
-
-	query.prepare("DELETE FROM users WHERE login=:login and id_domain=get_domain_id(:domain)");
 	
-	query.bindValue(":login", lineEdit_Login->text());
-	query.bindValue(":domain", lineEdit_Domain->text());
+	QSqlQuery query( db_psql );
 	
-	if(!query.exec()){
+	query.exec("SELECT 1");  
+	query.clear();
+	
+	if( db_psql.isOpen() ){
+		
+		query.prepare("DELETE FROM users WHERE login=:login and id_domain=get_domain_id(:domain)");
+		
+		query.bindValue(":login", lineEdit_Login->text());
+		query.bindValue(":domain", lineEdit_Domain->text());
+		
+		if(!query.exec()){
+			
+			QMessageBox::warning(this, tr("Query Error"),
+								 query.lastError().text(),
+								 QMessageBox::Ok);
+			query.clear();
+		}else{
 
-	  QMessageBox::warning(this, tr("Query Error"),
-						   query.lastError().text(),
-						   QMessageBox::Ok);
-	  query.clear();
-
+			/* Update user table.*/
+			query.clear();
+			pTable->removeRow(pTable->currentRow());
+			this->accept();	
+		}	
 	}else{
-	  
-	  query.clear();
-	  this->accept();
-
+		
+		this->reject();	
 	}
-	
-  }else{
-
-	this->reject();
-    
-  }
-  
 }
